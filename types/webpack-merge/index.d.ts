@@ -6,20 +6,70 @@
 ///<reference types="webpack" />
 
 declare module "webpack-merge" {
-    import { Configuration } from "webpack";
+  import { Configuration } from "webpack";
 
-    interface WebpackMerge {
-        /**
-         * Merge multiple webpack configurations into one.
-         */
-        (...configs: Configuration[]): Configuration;
+  // interfaces
+  interface ConfigurationJoiner {
+    (...configuration: Configuration[]): Configuration
+    (configuration: Configuration[]): Configuration
+  }
 
-        /**
-         * Merge multiple webpack configurations into one, with smart merging of loaders.
-         */
-        smart(...configs: Configuration[]): Configuration;
-    }
+  type CustomizeFunc = (a: any, b: any, key: string) => any
+  type CustomizationObj = {
+    customizeArray:  CustomizeFunc,
+    customizeObject: CustomizeFunc
+  }
 
-    const merge: WebpackMerge;
-    export = merge;
+  type StrategyType = 'prepend' | 'append' | 'replace'
+  type StrategyMap = { [feild: string]: StrategyType }
+
+  // core
+  interface WebpackMerge {
+    /**
+    * Merge multiple webpack configurations into one.
+    */
+    (...configuration: Configuration[]): Configuration
+
+    /**
+    * Merge array of webpack configurations into one.
+    */
+    (configuration: Configuration[]): Configuration
+
+    /**
+    * Merge multiple webpack configurations into one with custom behavior.
+    */
+    (customizationObj: CustomizationObj): ConfigurationJoiner
+
+    /**
+    * Unique merge strategy
+    */
+    unique: (
+      key: string,
+      uniques: string[],
+      getter: (a: any) => any
+    ) => any
+
+    /**
+     * Merging with a customizable merge strategy
+     */
+    strategy: (options: StrategyMap) => ConfigurationJoiner
+
+    /**
+     * Merging with a customizable smart merge strategy
+     */
+    smartStrategy: (options: StrategyMap) => ConfigurationJoiner
+
+    /**
+     * Merging with a smart merge strategy
+     */
+    smart: ConfigurationJoiner
+
+    /**
+     * Merging with a multiple merge strategy
+     */
+    multiple: ConfigurationJoiner
+  }
+
+  const merge: WebpackMerge;
+  export = merge;
 }
